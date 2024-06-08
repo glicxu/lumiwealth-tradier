@@ -5,8 +5,8 @@ with open("README.md", encoding="utf-8") as fh:
 
 setup(
     name="lumiwealth-tradier",
-    version="0.1.7",
-    author="David MacLeod and Robert Grzesik",
+    version="0.1.9",
+    author="David MacLeod and Robert Grzesik, modified by Gang",
     description="lumiwealth-tradier is a Python package that serves as a wrapper for the Tradier brokerage API. "
     "This package simplifies the process of making API requests, handling responses, and performing various trading "
     "and account management operations.",

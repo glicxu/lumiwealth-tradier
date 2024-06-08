@@ -322,6 +322,56 @@ class Orders(TradierApiBase):
         # Return the response
         return response["order"]
 
+    #Gang: extend to combo_order for cover call
+    def open_covered_call_order(
+        self,
+        symbol: str,
+        option_symbol: str,
+        stock_shares: int = 100,
+        option_shares: int = 1,
+        order_type: str = 'debit',
+        duration: str = 'day',
+        price: float = None,
+        tag: str = "",
+    ) -> dict:
+        """
+        Place a multi-leg order with the Tradier API.
+
+        :param symbol: The symbol of the underlying asset for the options.
+        :param order_type: The type of order ('market', 'debit', 'credit', 'even').
+        :param duration: The duration of the order ('day', 'gtc', 'pre', 'post').
+        :param legs: A list of OrderLeg objects, each representing one leg of the multi-leg order.
+        :param price: The price for the order, required only for 'debit' and 'credit' orders.
+        :param tag: An optional tag for the order.
+        :return: A dictionary representing the API's response.
+        """
+
+        # Start constructing the data payload
+        data = {
+            "class": "combo",
+            "symbol": symbol.upper(),
+            "option_symbol[1]": option_symbol,
+            "type": order_type.lower(),
+            "duration": duration.lower(),
+            "side[0]": 'buy',
+            "side[1]": 'sell_to_open',
+            "quantity[0]": stock_shares,
+            "quantity[1]": option_shares
+        }
+
+        if price is not None:
+            data["price"] = price
+
+        if tag:
+            data["tag"] = tag
+
+        # Send the request to the Tradier API
+        response = self.send(self.ORDER_ENDPOINT, data)
+
+        # Return the response
+        return response["order"]
+
+
     @staticmethod
     def _update_order_payload(payload, limit_price, order_type, stop_price, tag):
         if order_type.lower() == "limit" or order_type.lower() == "stop_limit":

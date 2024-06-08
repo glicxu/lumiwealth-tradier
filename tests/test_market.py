@@ -196,3 +196,6 @@ class TestMarket:
         assert trading_day > today - dt.timedelta(days=7)
 
         assert tradier.market.get_previous_trading_day(today) == trading_day
+
+    def test_get_dividend(self, tradier):
+        df = tradier.market.get_dividends(['CRM'])

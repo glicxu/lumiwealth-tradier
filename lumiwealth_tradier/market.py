@@ -29,6 +29,7 @@ class MarketData(TradierApiBase):
         self.CALENDAR_ENDPOINT = "v1/markets/calendar"
         self.SEARCH_ENDPOINT = "v1/markets/search"  # Companies lookup
         self.LOOKUP_SYMBOL_ENDPOINT = "v1/markets/lookup"
+        self.DIVIDEND_ENDPOINT = "beta/markets/fundamentals/dividends"
 
     # Create functions for each endpoint
     def get_quotes(self, symbols: Union[str, list[str]], greeks=False) -> pd.DataFrame:
@@ -64,6 +65,42 @@ class MarketData(TradierApiBase):
         df = pd.json_normalize(quotes)
 
         return df.set_index("symbol")
+
+
+    def get_dividends(self, symbols: Union[str, list[str]], greeks=False) -> pd.DataFrame:
+        # noinspection PyShadowingNames
+        """
+        Get quotes for a list of symbols.
+
+        Documentation: https://documentation.tradier.com/brokerage-api/markets/get-quotes
+
+        Example:
+            >>> from lumiwealth_tradier import Tradier
+            >>> tradier = Tradier('ACCOUNT_NUMBER', 'AUTH_TOKEN')
+            >>> dividends = tradier.market.get_dividends(['AAPL', 'MSFT'])
+            >>> apple_price = dividends.loc['AAPL']['last']
+
+        :param symbols: List of symbols to get quotes for.
+        :param greeks: Include greeks in response. Only Valid for Options.
+        :return: DataFrame of quotes.  See Tradier weblink for column definitions.
+        """
+        # Create payload
+        symbols = symbols if isinstance(symbols, str) else ",".join(symbols)
+        payload = {"symbols": symbols, greeks: greeks}
+
+        # Get response
+        response = self.request(self.DIVIDEND_ENDPOINT, payload)
+
+
+        #if "quote" not in response["quotes"]:
+        #    raise ValueError(f"Invalid symbol: {payload['symbols']}")
+
+        # Parse response - single Symbol doesn't return a list from the API, multiple symbols do
+        #quotes = response["quotes"]["quote"]
+        #quotes = quotes if isinstance(quotes, list) else [quotes]
+        #df = pd.json_normalize(response)
+
+        return response #df.set_index("symbol")
 
     def get_last_price(self, symbol: str) -> float:
         """
